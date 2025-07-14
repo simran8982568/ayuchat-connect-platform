@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { BarChart3, TrendingUp, Users, MessageSquare, Download, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/shared/ui/button';
+import { Card } from '@/components/shared/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const Analytics = () => {

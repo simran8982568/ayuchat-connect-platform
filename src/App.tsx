@@ -1,10 +1,10 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/shared/ui/toaster";
+import { Toaster as Sonner } from "@/components/shared/ui/sonner";
+import { TooltipProvider } from "@/components/shared/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Layout } from "@/components/layout/Layout";
+import { Layout } from "@/components/shared/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Inbox from "./pages/Inbox";
 import ChatbotBuilder from "./pages/ChatbotBuilder";

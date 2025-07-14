@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { StatsCard } from '@/components/dashboard/StatsCard';
-import { QuickActions } from '@/components/dashboard/QuickActions';
-import { RecentActivity } from '@/components/dashboard/RecentActivity';
+import { StatsCard } from '@/components/pagewise/dashboard/StatsCard';
+import { QuickActions } from '@/components/pagewise/dashboard/QuickActions';
+import { RecentActivity } from '@/components/pagewise/dashboard/RecentActivity';
 import { MessageSquare, Users, Send, BarChart3 } from 'lucide-react';
 
 const Dashboard = () => {

@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Search, Filter, MoreVertical, Phone, Video } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/shared/ui/input';
+import { Button } from '@/components/shared/ui/button';
 
 const Inbox = () => {
   const conversations = [

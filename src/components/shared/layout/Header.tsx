@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Bell, Search, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/shared/ui/button';
+import { Input } from '@/components/shared/ui/input';
 
 export const Header = () => {
   return (

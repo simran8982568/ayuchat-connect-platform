@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { Plus, Play, Pause, BarChart3, Users, Send, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/shared/ui/button';
+import { Card } from '@/components/shared/ui/card';
+import { Badge } from '@/components/shared/ui/badge';
 
 const Campaigns = () => {
   const [campaigns, setCampaigns] = useState([

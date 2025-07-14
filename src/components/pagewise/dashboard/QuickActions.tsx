@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { MessageSquare, Send, Users, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/shared/ui/button';
 
 export const QuickActions = () => {
   const actions = [

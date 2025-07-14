@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
 import { Save, User, Bell, Shield, CreditCard, Phone, Globe, Key } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/shared/ui/button';
+import { Input } from '@/components/shared/ui/input';
+import { Card } from '@/components/shared/ui/card';
+import { Switch } from '@/components/shared/ui/switch';
+import { Badge } from '@/components/shared/ui/badge';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('profile');

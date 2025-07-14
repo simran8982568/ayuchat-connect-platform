@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { Plus, Play, Save, Settings, Zap, MessageSquare, Users, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/shared/ui/button';
+import { Card } from '@/components/shared/ui/card';
 
 const ChatbotBuilder = () => {
   const [flows, setFlows] = useState([

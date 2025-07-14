@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Download, Upload, Users, UserPlus, Tag } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/shared/ui/button';
+import { Input } from '@/components/shared/ui/input';
+import { Card } from '@/components/shared/ui/card';
+import { Badge } from '@/components/shared/ui/badge';
 
 const Contacts = () => {
   const [contacts, setContacts] = useState([

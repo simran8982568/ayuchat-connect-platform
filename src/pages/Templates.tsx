@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { Plus, Search, Filter, CheckCircle, Clock, XCircle, Edit } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/shared/ui/button';
+import { Input } from '@/components/shared/ui/input';
+import { Card } from '@/components/shared/ui/card';
 
 const Templates = () => {
   const [templates, setTemplates] = useState([
