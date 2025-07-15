@@ -16,12 +16,13 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/', icon: BarChart3 },
   { name: 'Inbox', href: '/inbox', icon: MessageSquare },
-  { name: 'Chatbot Builder', href: '/chatbot', icon: Settings },
-  { name: 'Templates', href: '/templates', icon: FileText },
   { name: 'Campaigns', href: '/campaigns', icon: Mail },
   { name: 'Contacts', href: '/contacts', icon: Users },
+  { name: 'Automation', href: '/automation', icon: Settings },
+  { name: 'Templates', href: '/templates', icon: FileText },
+  { name: 'Phone Numbers', href: '/phone-numbers', icon: Bell },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Integration', href: '/integration', icon: Settings },
+  { name: 'Billing', href: '/billing', icon: Clock },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
