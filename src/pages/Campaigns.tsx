@@ -4,13 +4,18 @@ import { Button } from '@/components/shared/ui/button';
 import { Badge } from '@/components/shared/ui/badge';
 import { Input } from '@/components/shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shared/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/shared/ui/dialog';
 import { Plus, Send, Calendar, Users, BarChart3, Play, Pause, Edit, Trash2, Clock, CheckCircle, XCircle, Filter } from 'lucide-react';
 
 const Campaigns = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [expandedGraphs, setExpandedGraphs] = useState(new Set());
   
-  const [campaigns] = useState([
+  const [campaigns, setCampaigns] = useState([
     {
       id: 1,
       name: 'Welcome Series',
@@ -107,6 +112,35 @@ const Campaigns = () => {
     return matchesStatus && matchesSearch;
   });
 
+  const handlePauseCampaign = (id: number) => {
+    setCampaigns(campaigns.map(campaign => 
+      campaign.id === id 
+        ? { ...campaign, status: campaign.status === 'active' ? 'paused' : 'active' }
+        : campaign
+    ));
+  };
+
+  const handleDeleteCampaign = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this campaign?')) {
+      setCampaigns(campaigns.filter(campaign => campaign.id !== id));
+    }
+  };
+
+  const toggleGraph = (id: number) => {
+    const newExpanded = new Set(expandedGraphs);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedGraphs(newExpanded);
+  };
+
+  const handleEditCampaign = (campaign: any) => {
+    setSelectedCampaign(campaign);
+    setShowEditModal(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -116,14 +150,62 @@ const Campaigns = () => {
           <p className="text-gray-600 mt-1">Create, schedule, and track your WhatsApp marketing campaigns</p>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Campaign Analytics
-          </Button>
-          <Button className="bg-primary hover:bg-primary/90">
-            <Plus className="w-4 h-4 mr-2" />
-            Create Campaign
-          </Button>
+          <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary/90">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Campaign
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create New Campaign</DialogTitle>
+                <DialogDescription>
+                  Set up your WhatsApp marketing campaign with template selection, audience targeting, and scheduling.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Campaign Name</label>
+                  <Input placeholder="Enter campaign name" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Template</label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="welcome">Welcome Template</SelectItem>
+                      <SelectItem value="promo">Promotional Template</SelectItem>
+                      <SelectItem value="reminder">Reminder Template</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Audience</label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select audience" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Contacts</SelectItem>
+                      <SelectItem value="vip">VIP Customers</SelectItem>
+                      <SelectItem value="leads">New Leads</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Schedule</label>
+                  <Input type="datetime-local" />
+                </div>
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+                  <Button onClick={() => setShowCreateModal(false)}>Create Campaign</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -231,146 +313,203 @@ const Campaigns = () => {
         <CardContent>
           <div className="space-y-4">
             {filteredCampaigns.map((campaign) => (
-              <Card key={campaign.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
-                        {getStatusBadge(campaign.status)}
-                        <Badge variant="outline" className="text-xs">
-                          {campaign.type}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">Template: {campaign.template}</p>
-                      {campaign.scheduled && (
-                        <p className="text-sm text-gray-500 mb-4">
-                          <Calendar className="w-4 h-4 inline mr-1" />
-                          Scheduled: {campaign.scheduled}
-                        </p>
-                      )}
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-600">Recipients</p>
-                          <p className="font-medium text-gray-900">{campaign.recipients.toLocaleString()}</p>
+              <div key={campaign.id}>
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
+                          {getStatusBadge(campaign.status)}
+                          <Badge variant="outline" className="text-xs">
+                            {campaign.type}
+                          </Badge>
                         </div>
-                        <div>
-                          <p className="text-gray-600">Sent</p>
-                          <p className="font-medium text-gray-900">{campaign.sent.toLocaleString()}</p>
+                        <p className="text-sm text-gray-600 mb-2">Template: {campaign.template}</p>
+                        {campaign.scheduled && (
+                          <p className="text-sm text-gray-500 mb-4">
+                            <Calendar className="w-4 h-4 inline mr-1" />
+                            Scheduled: {campaign.scheduled}
+                          </p>
+                        )}
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-600">Recipients</p>
+                            <p className="font-medium text-gray-900">{campaign.recipients.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Sent</p>
+                            <p className="font-medium text-gray-900">{campaign.sent.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Delivered</p>
+                            <p className="font-medium text-gray-900">{campaign.delivered.toLocaleString()}</p>
+                            {campaign.delivery_rate > 0 && (
+                              <p className="text-xs text-gray-500">{campaign.delivery_rate}%</p>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Read</p>
+                            <p className="font-medium text-gray-900">{campaign.read.toLocaleString()}</p>
+                            {campaign.open_rate > 0 && (
+                              <p className="text-xs text-gray-500">{campaign.open_rate}%</p>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Clicked</p>
+                            <p className="font-medium text-gray-900">{campaign.clicked.toLocaleString()}</p>
+                            {campaign.click_rate > 0 && (
+                              <p className="text-xs text-gray-500">{campaign.click_rate}%</p>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Created</p>
+                            <p className="font-medium text-gray-900">{campaign.created_at}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-gray-600">Delivered</p>
-                          <p className="font-medium text-gray-900">{campaign.delivered.toLocaleString()}</p>
-                          {campaign.delivery_rate > 0 && (
-                            <p className="text-xs text-gray-500">{campaign.delivery_rate}%</p>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Read</p>
-                          <p className="font-medium text-gray-900">{campaign.read.toLocaleString()}</p>
-                          {campaign.open_rate > 0 && (
-                            <p className="text-xs text-gray-500">{campaign.open_rate}%</p>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Clicked</p>
-                          <p className="font-medium text-gray-900">{campaign.clicked.toLocaleString()}</p>
-                          {campaign.click_rate > 0 && (
-                            <p className="text-xs text-gray-500">{campaign.click_rate}%</p>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Created</p>
-                          <p className="font-medium text-gray-900">{campaign.created_at}</p>
-                        </div>
+
+                        {/* Performance Indicators */}
+                        {campaign.sent > 0 && (
+                          <div className="mt-4 grid grid-cols-3 gap-4">
+                            <div className="text-center p-3 bg-blue-50 rounded-lg">
+                              <p className="text-xs text-gray-600">Delivery Rate</p>
+                              <p className="font-semibold text-blue-600">{campaign.delivery_rate}%</p>
+                            </div>
+                            <div className="text-center p-3 bg-green-50 rounded-lg">
+                              <p className="text-xs text-gray-600">Open Rate</p>
+                              <p className="font-semibold text-green-600">{campaign.open_rate}%</p>
+                            </div>
+                            <div className="text-center p-3 bg-purple-50 rounded-lg">
+                              <p className="text-xs text-gray-600">Click Rate</p>
+                              <p className="font-semibold text-purple-600">{campaign.click_rate}%</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Performance Indicators */}
-                      {campaign.sent > 0 && (
-                        <div className="mt-4 grid grid-cols-3 gap-4">
-                          <div className="text-center p-3 bg-blue-50 rounded-lg">
-                            <p className="text-xs text-gray-600">Delivery Rate</p>
-                            <p className="font-semibold text-blue-600">{campaign.delivery_rate}%</p>
-                          </div>
-                          <div className="text-center p-3 bg-green-50 rounded-lg">
-                            <p className="text-xs text-gray-600">Open Rate</p>
-                            <p className="font-semibold text-green-600">{campaign.open_rate}%</p>
-                          </div>
-                          <div className="text-center p-3 bg-purple-50 rounded-lg">
-                            <p className="text-xs text-gray-600">Click Rate</p>
-                            <p className="font-semibold text-purple-600">{campaign.click_rate}%</p>
-                          </div>
-                        </div>
-                      )}
+                      <div className="flex items-center space-x-2 ml-4">
+                        {(campaign.status === 'active' || campaign.status === 'paused') && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className={campaign.status === 'active' ? "text-orange-600" : "text-green-600"}
+                            onClick={() => handlePauseCampaign(campaign.id)}
+                          >
+                            {campaign.status === 'active' ? (
+                              <>
+                                <Pause className="w-4 h-4 mr-1" />
+                                Pause
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-4 h-4 mr-1" />
+                                Resume
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => toggleGraph(campaign.id)}
+                        >
+                          <BarChart3 className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditCampaign(campaign)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-red-600"
+                          onClick={() => handleDeleteCampaign(campaign.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
+                  </CardContent>
+                </Card>
 
-                    <div className="flex items-center space-x-2 ml-4">
-                      {campaign.status === 'scheduled' && (
-                        <Button variant="outline" size="sm" className="text-green-600">
-                          <Play className="w-4 h-4 mr-1" />
-                          Start Now
-                        </Button>
-                      )}
-                      {campaign.status === 'active' && (
-                        <Button variant="outline" size="sm" className="text-orange-600">
-                          <Pause className="w-4 h-4 mr-1" />
-                          Pause
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="sm">
-                        <BarChart3 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-red-600">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Inline Graph */}
+                {expandedGraphs.has(campaign.id) && campaign.sent > 0 && (
+                  <Card className="mt-2">
+                    <CardContent className="p-6">
+                      <h4 className="font-semibold text-gray-900 mb-4">Campaign Analytics</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="text-center">
+                          <div className="h-24 bg-blue-100 rounded-lg flex items-center justify-center mb-2">
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-blue-600">{campaign.delivered}</p>
+                              <p className="text-xs text-blue-600">Delivered</p>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600">Delivery Rate: {campaign.delivery_rate}%</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="h-24 bg-green-100 rounded-lg flex items-center justify-center mb-2">
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-green-600">{campaign.read}</p>
+                              <p className="text-xs text-green-600">Read</p>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600">Open Rate: {campaign.open_rate}%</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="h-24 bg-purple-100 rounded-lg flex items-center justify-center mb-2">
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-purple-600">{campaign.clicked}</p>
+                              <p className="text-xs text-purple-600">Clicked</p>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600">Click Rate: {campaign.click_rate}%</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Campaign Builder Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Send className="w-6 h-6 text-blue-600" />
+      {/* Edit Campaign Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Campaign</DialogTitle>
+            <DialogDescription>
+              Update your campaign settings and configuration.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedCampaign && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Campaign Name</label>
+                <Input defaultValue={selectedCampaign.name} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Template</label>
+                <Input defaultValue={selectedCampaign.template} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Recipients</label>
+                <Input defaultValue={selectedCampaign.recipients} type="number" />
+              </div>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => setShowEditModal(false)}>Cancel</Button>
+                <Button onClick={() => setShowEditModal(false)}>Save Changes</Button>
+              </div>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Broadcast Campaign</h3>
-            <p className="text-gray-600 text-sm mb-4">Send promotional messages to segmented audience</p>
-            <Button className="w-full">Create Broadcast</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Scheduled Campaign</h3>
-            <p className="text-gray-600 text-sm mb-4">Schedule messages for optimal delivery times</p>
-            <Button variant="outline" className="w-full">Schedule Campaign</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <BarChart3 className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">A/B Test Campaign</h3>
-            <p className="text-gray-600 text-sm mb-4">Test different message variants for better performance</p>
-            <Button variant="outline" className="w-full">Create A/B Test</Button>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

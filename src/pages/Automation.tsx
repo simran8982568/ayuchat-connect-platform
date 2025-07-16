@@ -3,6 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/shared/ui/button';
 import { Badge } from '@/components/shared/ui/badge';
 import { Switch } from '@/components/shared/ui/switch';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/shared/ui/dialog';
+import { Input } from '@/components/shared/ui/input';
+import { Label } from '@/components/shared/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shared/ui/select';
 import { Plus, Play, Pause, Edit, Trash2, Zap, MessageSquare, UserPlus, Tag, Clock } from 'lucide-react';
 
 const Automation = () => {
@@ -39,6 +43,10 @@ const Automation = () => {
     }
   ]);
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedAutomation, setSelectedAutomation] = useState(null);
+
   const triggerTypes = [
     { icon: UserPlus, name: 'Contact Added', description: 'When a new contact is added' },
     { icon: Tag, name: 'Tag Applied', description: 'When a specific tag is applied' },
@@ -61,6 +69,17 @@ const Automation = () => {
     ));
   };
 
+  const handleEditAutomation = (automation: any) => {
+    setSelectedAutomation(automation);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteAutomation = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this automation?')) {
+      setAutomations(automations.filter(automation => automation.id !== id));
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -69,10 +88,68 @@ const Automation = () => {
           <h1 className="text-2xl font-bold text-gray-900">Automation</h1>
           <p className="text-gray-600 mt-1">Create automated workflows to engage your customers</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
-          <Plus className="w-4 h-4 mr-2" />
-          Create Automation
-        </Button>
+        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary hover:bg-primary/90">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Automation
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Automation</DialogTitle>
+              <DialogDescription>
+                Set up automated workflows with triggers and actions to engage your contacts.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Automation Name</Label>
+                <Input placeholder="Enter automation name" />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input placeholder="Describe what this automation does" />
+              </div>
+              <div className="space-y-2">
+                <Label>Trigger</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select trigger" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="contact-added">Contact Added</SelectItem>
+                    <SelectItem value="tag-applied">Tag Applied</SelectItem>
+                    <SelectItem value="message-received">Message Received</SelectItem>
+                    <SelectItem value="time-based">Time Based</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Action</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="send-template">Send Template</SelectItem>
+                    <SelectItem value="add-tag">Add Tag</SelectItem>
+                    <SelectItem value="wait">Add Delay</SelectItem>
+                    <SelectItem value="assign-agent">Assign Agent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Delay (optional)</Label>
+                <Input placeholder="e.g., 1 hour, 2 days" />
+              </div>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+                <Button onClick={() => setShowCreateModal(false)}>Create Automation</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats */}
@@ -213,10 +290,18 @@ const Automation = () => {
                       checked={automation.status === 'active'}
                       onCheckedChange={() => toggleAutomation(automation.id)}
                     />
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditAutomation(automation)}
+                    >
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDeleteAutomation(automation.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -226,6 +311,42 @@ const Automation = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Automation Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Automation</DialogTitle>
+            <DialogDescription>
+              Update your automation settings and configuration.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedAutomation && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Automation Name</Label>
+                <Input defaultValue={selectedAutomation.name} />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input defaultValue={selectedAutomation.description} />
+              </div>
+              <div className="space-y-2">
+                <Label>Trigger</Label>
+                <Input defaultValue={selectedAutomation.trigger} />
+              </div>
+              <div className="space-y-2">
+                <Label>Actions</Label>
+                <Input defaultValue={selectedAutomation.actions.join(', ')} />
+              </div>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => setShowEditModal(false)}>Cancel</Button>
+                <Button onClick={() => setShowEditModal(false)}>Save Changes</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

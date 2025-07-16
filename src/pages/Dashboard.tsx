@@ -61,27 +61,27 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Setup Guide */}
+      {/* Subscription Status */}
       <div className="ayuchat-card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Getting Started</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Subscription Status</h3>
+        <p className="text-gray-600 text-sm mb-4">Your current plan and usage</p>
         <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            </div>
-            <span className="text-sm text-gray-600">Connect your WhatsApp Business Account</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-900">Plan:</span>
+            <span className="text-sm text-gray-600">Pro Plan</span>
           </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            </div>
-            <span className="text-sm text-gray-600">Create your first message template</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-900">Messages Remaining:</span>
+            <span className="text-sm text-gray-600">8,750</span>
           </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-            </div>
-            <span className="text-sm text-gray-600">Import your contact list</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-900">Plan expires on:</span>
+            <span className="text-sm text-gray-600">March 15, 2024</span>
+          </div>
+          <div className="pt-2">
+            <button className="ayuchat-button w-full text-sm">
+              Upgrade Plan
+            </button>
           </div>
         </div>
       </div>
