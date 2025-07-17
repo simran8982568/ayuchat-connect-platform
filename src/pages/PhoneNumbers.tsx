@@ -3,10 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/shared/ui/button';
 import { Badge } from '@/components/shared/ui/badge';
 import { Input } from '@/components/shared/ui/input';
-import { Plus, Phone, Settings, CheckCircle, AlertCircle, Search } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/shared/ui/dialog';
+import { Plus, Phone, Settings, CheckCircle, AlertCircle, Search, Eye } from 'lucide-react';
 
 const PhoneNumbers = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [selectedNumber, setSelectedNumber] = useState(null);
   const [phoneNumbers] = useState([
     {
       id: 1,
@@ -86,7 +91,7 @@ const PhoneNumbers = () => {
           <h1 className="text-2xl font-bold text-gray-900">Phone Numbers</h1>
           <p className="text-gray-600 mt-1">Manage your WhatsApp Business phone numbers</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90" onClick={() => setShowAddModal(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Add Phone Number
         </Button>
@@ -219,11 +224,26 @@ const PhoneNumbers = () => {
                   </div>
 
                   <div className="flex items-center space-x-2 ml-4">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedNumber(phoneNumber);
+                        setShowConfigModal(true);
+                      }}
+                    >
                       <Settings className="w-4 h-4 mr-2" />
                       Configure
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedNumber(phoneNumber);
+                        setShowDetailsModal(true);
+                      }}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
                   </div>
@@ -288,6 +308,131 @@ const PhoneNumbers = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Phone Number Modal */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Phone Number</DialogTitle>
+            <DialogDescription>
+              Add a new WhatsApp Business phone number to your account
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Phone Number</label>
+              <Input placeholder="+1 (555) 123-4567" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Display Name</label>
+              <Input placeholder="Business Name" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Country</label>
+              <select className="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>United States</option>
+                <option>United Kingdom</option>
+                <option>India</option>
+                <option>Canada</option>
+              </select>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
+              <Button onClick={() => setShowAddModal(false)}>Add Number</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Details Modal */}
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Phone Number Details</DialogTitle>
+            <DialogDescription>
+              Complete information about this WhatsApp Business number
+            </DialogDescription>
+          </DialogHeader>
+          {selectedNumber && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Phone Number</label>
+                  <p className="text-gray-900">{selectedNumber.number}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Display Name</label>
+                  <p className="text-gray-900">{selectedNumber.display_name}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Status</label>
+                  {getStatusBadge(selectedNumber.status)}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Quality Rating</label>
+                  <div className="flex items-center space-x-2">
+                    {getQualityIcon(selectedNumber.quality_rating)}
+                    <span className="capitalize">{selectedNumber.quality_rating}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Daily Limit</label>
+                  <p className="text-gray-900">{selectedNumber.messaging_limit} messages</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Messages Sent Today</label>
+                  <p className="text-gray-900">{selectedNumber.messages_sent_24h} messages</p>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600">Webhook URL</label>
+                <div className="bg-gray-50 p-3 rounded border">
+                  <p className="text-gray-900 break-all">{selectedNumber.webhook_url}</p>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowDetailsModal(false)}>Close</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Modal */}
+      <Dialog open={showConfigModal} onOpenChange={setShowConfigModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Configure WhatsApp Number</DialogTitle>
+            <DialogDescription>
+              Follow Meta's WhatsApp Cloud API configuration steps
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h4 className="font-semibold text-gray-900 mb-2">Step 1: Verify Phone Number</h4>
+              <p className="text-sm text-gray-600 mb-3">Verify your phone number with SMS or voice call</p>
+              <Button size="sm">Start Verification</Button>
+            </div>
+            <div className="border-l-4 border-gray-300 pl-4">
+              <h4 className="font-semibold text-gray-600 mb-2">Step 2: Configure Webhook</h4>
+              <p className="text-sm text-gray-500 mb-3">Set up webhook URL to receive messages</p>
+              <Button size="sm" variant="outline" disabled>Configure Webhook</Button>
+            </div>
+            <div className="border-l-4 border-gray-300 pl-4">
+              <h4 className="font-semibold text-gray-600 mb-2">Step 3: Test Messaging</h4>
+              <p className="text-sm text-gray-500 mb-3">Send a test message to verify setup</p>
+              <Button size="sm" variant="outline" disabled>Send Test Message</Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowConfigModal(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

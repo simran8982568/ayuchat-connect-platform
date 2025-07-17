@@ -3,17 +3,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/shared/ui/button';
 import { Badge } from '@/components/shared/ui/badge';
 import { Progress } from '@/components/shared/ui/progress';
-import { Check, CreditCard, Download, Calendar, Zap, Users, MessageSquare } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/shared/ui/dialog';
+import { Check, Download, Calendar, Zap, Users, MessageSquare } from 'lucide-react';
 
 const Billing = () => {
   const [currentPlan] = useState('pro');
   const [billingCycle, setBillingCycle] = useState('monthly');
+  const [showChangePlanModal, setShowChangePlanModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const plans = [
     {
       id: 'starter',
       name: 'Starter',
-      price: { monthly: 29, yearly: 290 },
+      price: { monthly: 2499, yearly: 24990 },
       description: 'Perfect for small businesses',
       features: [
         '1,000 messages/month',
@@ -32,7 +35,7 @@ const Billing = () => {
     {
       id: 'pro',
       name: 'Pro',
-      price: { monthly: 79, yearly: 790 },
+      price: { monthly: 6999, yearly: 69990 },
       description: 'Most popular for growing businesses',
       features: [
         '5,000 messages/month',
@@ -53,7 +56,7 @@ const Billing = () => {
     {
       id: 'enterprise',
       name: 'Enterprise',
-      price: { monthly: 199, yearly: 1990 },
+      price: { monthly: 19999, yearly: 199990 },
       description: 'For large-scale operations',
       features: [
         '25,000 messages/month',
@@ -80,10 +83,10 @@ const Billing = () => {
   };
 
   const invoices = [
-    { id: 'INV-001', date: '2024-01-01', amount: 79, status: 'paid', plan: 'Pro Monthly' },
-    { id: 'INV-002', date: '2023-12-01', amount: 79, status: 'paid', plan: 'Pro Monthly' },
-    { id: 'INV-003', date: '2023-11-01', amount: 79, status: 'paid', plan: 'Pro Monthly' },
-    { id: 'INV-004', date: '2023-10-01', amount: 79, status: 'paid', plan: 'Pro Monthly' }
+    { id: 'INV-001', date: '2024-01-01', amount: 6999, status: 'paid', plan: 'Pro Monthly' },
+    { id: 'INV-002', date: '2023-12-01', amount: 6999, status: 'paid', plan: 'Pro Monthly' },
+    { id: 'INV-003', date: '2023-11-01', amount: 6999, status: 'paid', plan: 'Pro Monthly' },
+    { id: 'INV-004', date: '2023-10-01', amount: 6999, status: 'paid', plan: 'Pro Monthly' }
   ];
 
   const currentPlanData = plans.find(plan => plan.id === currentPlan);
@@ -96,10 +99,6 @@ const Billing = () => {
           <h1 className="text-2xl font-bold text-gray-900">Billing & Subscription</h1>
           <p className="text-gray-600 mt-1">Manage your subscription and billing information</p>
         </div>
-        <Button variant="outline">
-          <CreditCard className="w-4 h-4 mr-2" />
-          Update Payment Method
-        </Button>
       </div>
 
       {/* Current Plan */}
@@ -162,8 +161,8 @@ const Billing = () => {
               <p className="font-medium">February 1, 2024</p>
             </div>
             <div className="flex space-x-3">
-              <Button variant="outline">Change Plan</Button>
-              <Button variant="outline">Cancel Subscription</Button>
+              <Button variant="outline" onClick={() => setShowChangePlanModal(true)}>Change Plan</Button>
+              <Button variant="outline" onClick={() => setShowCancelModal(true)}>Cancel Subscription</Button>
             </div>
           </div>
         </CardContent>
@@ -206,7 +205,7 @@ const Billing = () => {
                   <p className="text-sm text-gray-600 mt-1">{plan.description}</p>
                   <div className="mt-4">
                     <span className="text-3xl font-bold text-gray-900">
-                      ${billingCycle === 'monthly' ? plan.price.monthly : plan.price.yearly}
+                      ₹{(billingCycle === 'monthly' ? plan.price.monthly : plan.price.yearly).toLocaleString()}
                     </span>
                     <span className="text-gray-600">
                       /{billingCycle === 'monthly' ? 'month' : 'year'}
@@ -226,6 +225,11 @@ const Billing = () => {
                 <Button 
                   className={`w-full mt-6 ${currentPlan === plan.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={currentPlan === plan.id}
+                  onClick={() => {
+                    if (currentPlan !== plan.id) {
+                      setShowChangePlanModal(true);
+                    }
+                  }}
                 >
                   {currentPlan === plan.id ? 'Current Plan' : 'Upgrade'}
                 </Button>
@@ -284,7 +288,7 @@ const Billing = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Next Billing</p>
-                <p className="text-2xl font-bold text-gray-900">$79</p>
+                <p className="text-2xl font-bold text-gray-900">₹6,999</p>
               </div>
               <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
                 <Calendar className="h-6 w-6 text-orange-600" />
@@ -312,13 +316,36 @@ const Billing = () => {
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
-                    <p className="font-medium text-gray-900">${invoice.amount}</p>
+                    <p className="font-medium text-gray-900">₹{invoice.amount.toLocaleString()}</p>
                     <p className="text-sm text-gray-600">{invoice.date}</p>
                   </div>
                   <Badge variant={invoice.status === 'paid' ? 'default' : 'secondary'}>
                     {invoice.status}
                   </Badge>
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      // Generate Excel invoice
+                      const csvData = [
+                        ['Invoice ID', invoice.id],
+                        ['Date', invoice.date],
+                        ['Plan', invoice.plan],
+                        ['Amount', `₹${invoice.amount.toLocaleString()}`],
+                        ['Status', invoice.status]
+                      ];
+                      const csvContent = csvData.map(row => row.join(',')).join('\n');
+                      const blob = new Blob([csvContent], { type: 'text/csv' });
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.setAttribute('hidden', '');
+                      a.setAttribute('href', url);
+                      a.setAttribute('download', `${invoice.id}.csv`);
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                    }}
+                  >
                     <Download className="w-4 h-4" />
                   </Button>
                 </div>
@@ -327,6 +354,78 @@ const Billing = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Change Plan Modal */}
+      <Dialog open={showChangePlanModal} onOpenChange={setShowChangePlanModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Plan</DialogTitle>
+            <DialogDescription>
+              Select a new plan and proceed with payment
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              {plans.map((plan) => (
+                <div key={plan.id} className={`border rounded-lg p-4 cursor-pointer hover:border-primary ${currentPlan === plan.id ? 'border-primary bg-primary/5' : ''}`}>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold">{plan.name}</h3>
+                      <p className="text-sm text-gray-600">{plan.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">₹{plan.price.monthly.toLocaleString()}/month</p>
+                      {currentPlan === plan.id && <Badge className="mt-1">Current</Badge>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowChangePlanModal(false)}>Cancel</Button>
+              <Button onClick={() => {
+                setShowChangePlanModal(false);
+                // Proceed to payment
+                alert('Redirecting to payment gateway...');
+              }}>
+                Proceed to Payment
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Subscription Modal */}
+      <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Subscription</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel your subscription? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                Your subscription will remain active until the next billing date (February 1, 2024). 
+                After that, you'll lose access to premium features.
+              </p>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowCancelModal(false)}>Keep Subscription</Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  setShowCancelModal(false);
+                  alert('Subscription cancelled successfully');
+                }}
+              >
+                Cancel Subscription
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

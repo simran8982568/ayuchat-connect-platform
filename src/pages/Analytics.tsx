@@ -1,11 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart3, TrendingUp, Users, MessageSquare, Download, Calendar } from 'lucide-react';
 import { Button } from '@/components/shared/ui/button';
 import { Card } from '@/components/shared/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/shared/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/shared/ui/calendar';
+import { format } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const Analytics = () => {
+  const [dateRange, setDateRange] = useState({
+    from: new Date(2024, 0, 1),
+    to: new Date()
+  });
   const messageData = [
     { name: 'Jan', sent: 4000, delivered: 3800, read: 2400 },
     { name: 'Feb', sent: 3000, delivered: 2800, read: 2210 },
@@ -39,11 +46,63 @@ const Analytics = () => {
           <p className="text-gray-600 mt-1">Monitor your WhatsApp performance and engagement</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
-            <Calendar className="w-4 h-4 mr-2" />
-            Last 30 Days
-          </Button>
-          <Button variant="outline">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                <Calendar className="w-4 h-4 mr-2" />
+                {dateRange.from && dateRange.to ? (
+                  `${format(dateRange.from, "dd/MM/yyyy")} - ${format(dateRange.to, "dd/MM/yyyy")}`
+                ) : (
+                  "Select Date Range"
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">From Date</label>
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateRange.from}
+                    onSelect={(date) => setDateRange({...dateRange, from: date})}
+                    className="rounded-md border"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">To Date</label>
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateRange.to}
+                    onSelect={(date) => setDateRange({...dateRange, to: date})}
+                    className="rounded-md border"
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button 
+            variant="outline"
+            onClick={() => {
+              // Generate Excel export
+              const csvData = [
+                ['Date Range', `${format(dateRange.from, "dd/MM/yyyy")} - ${format(dateRange.to, "dd/MM/yyyy")}`],
+                ['Total Messages', '156,284'],
+                ['Delivery Rate', '98.7%'],
+                ['Read Rate', '76.3%'],
+                ['Response Rate', '23.8%']
+              ];
+              const csvContent = csvData.map(row => row.join(',')).join('\n');
+              const blob = new Blob([csvContent], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.setAttribute('hidden', '');
+              a.setAttribute('href', url);
+              a.setAttribute('download', `analytics-report-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            }}
+          >
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>
